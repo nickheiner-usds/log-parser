@@ -4,19 +4,20 @@ from datetime import datetime
 
 file = open('fixtures/{}'.format(sys.argv[1]))
 
-# I would like to include %z when parsing the time zone, but that 
-# requires installing additional packages, and I don't have admin 
-# access on this government-issued machine, so I can't install pip. 
-# I will have to fix the timezone manually.
-date_regex = re.compile('.*\[(2017-\d\d-\d\d \d\d:\d\d:\d\d) -0400\].*')
+# I don't have admin access on this government-issued machine, so I can't install pip. 
+# That makes some things weird.
+hour_regex = re.compile('.*\[2017-\d\d-\d\d (\d\d):\d\d:\d\d -0400\].*')
+
+count_by_hour = dict({hour: 0 for hour in range(24)})
 
 for line in file:
-    date_match = date_regex.match(line)
-    if not date_match:
+    hour_match = hour_regex.match(line)
+    if not hour_match:
         print 'Line did not match: "{}"'.format(line)
         continue
 
-    date_str = date_match.group(1)
-    unix_timestamp = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime('%s')
+    hour = int(hour_match.group(1))
+    count_by_hour[hour] += 1
 
-    print parsed_date
+for hour, count in count_by_hour.iteritems():
+    print '{},{}'.format(hour, count)
